@@ -1287,7 +1287,7 @@ function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);g
 function makeProgram(vs,fs){const p=gl.createProgram();gl.attachShader(p,shader(gl.VERTEX_SHADER,vs));gl.attachShader(p,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p}
 const terrainProg=makeProgram(`#version 300 es
 precision highp float;layout(location=0)in vec3 p;layout(location=1)in vec3 n;layout(location=2)in vec3 c;uniform mat4 mvp;out vec3 vN;out vec3 vC;out vec3 vP;void main(){vN=n;vC=c;vP=p;gl_Position=mvp*vec4(p,1.);}`,`#version 300 es
-precision highp float;in vec3 vN;in vec3 vC;in vec3 vP;uniform float spotMax;uniform float focus;out vec4 o;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}void main(){vec3 N=normalize(vN);vec3 L=normalize(vec3(-.38,.80,.29));float nd=max(dot(N,L),0.);float wrap=.24+.76*nd;float slope=pow(1.-abs(N.y),1.25);float cavity=.78+.22*pow(abs(N.y),.55);float grain=.93+.09*h(floor(vP*2.4))+.04*sin(vP.x*1.7+vP.z*1.3);vec3 col=vC*wrap*cavity*grain;col+=vec3(.026,.060,.085)*slope;float dep=clamp(-vP.y/max(spotMax,1.),0.,1.);col=mix(col,vec3(.005,.014,.026),dep*.34);float rim=pow(max(dot(N,normalize(vec3(.42,.45,-.65))),0.),5.);col+=vec3(.035,.07,.09)*rim;col*=mix(.22,.34,focus);col=mix(col,vec3(.004,.010,.017),dep*.14);o=vec4(col,1.);}`);
+precision highp float;in vec3 vN;in vec3 vC;in vec3 vP;uniform float spotMax;uniform float focus;uniform float markerDepth;out vec4 o;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}void main(){vec3 N=normalize(vN);vec3 L=normalize(vec3(-.38,.80,.29));float nd=max(dot(N,L),0.);float wrap=.24+.76*nd;float slope=pow(1.-abs(N.y),1.25);float cavity=.78+.22*pow(abs(N.y),.55);float grain=.93+.09*h(floor(vP*2.4))+.04*sin(vP.x*1.7+vP.z*1.3);vec3 col=vC*wrap*cavity*grain;col+=vec3(.026,.060,.085)*slope;float dep=clamp(-vP.y/max(spotMax,1.),0.,1.);col=mix(col,vec3(.005,.014,.026),dep*.34);float rim=pow(max(dot(N,normalize(vec3(.42,.45,-.65))),0.),5.);col+=vec3(.035,.07,.09)*rim;col*=mix(.22,.34,focus);col=mix(col,vec3(.004,.010,.017),dep*.14);float slice=1.-smoothstep(.16,.62,abs(-vP.y-markerDepth));col=mix(col,vec3(1.,.31,.075),slice);o=vec4(col,1.);}`);
 const splatProg=makeProgram(`#version 300 es
 precision highp float;
 layout(location=0)in vec2 corner;
@@ -1298,17 +1298,17 @@ layout(location=4)in vec3 color;
 layout(location=5)in vec2 radii;
 layout(location=6)in float alpha;
 uniform mat4 mvp;uniform float focus;uniform float scaleMul;uniform float alphaMul;
-out vec2 vUV;out vec3 vC;out float vA;out float vDepth;
-void main(){vec3 wp=center+tangent*(corner.x*radii.x*scaleMul)+bitangent*(corner.y*radii.y*scaleMul);vec4 q=mvp*vec4(wp,1.);gl_Position=q;vUV=corner;vC=color;vA=alpha*alphaMul*mix(.70,1.0,focus);vDepth=clamp(-center.y/110.0,0.0,1.0);}`,
+out vec2 vUV;out vec3 vC;out float vA;out float vDepth;out float vWorldDepth;
+void main(){vec3 wp=center+tangent*(corner.x*radii.x*scaleMul)+bitangent*(corner.y*radii.y*scaleMul);vec4 q=mvp*vec4(wp,1.);gl_Position=q;vUV=corner;vC=color;vA=alpha*alphaMul*mix(.70,1.0,focus);vDepth=clamp(-center.y/110.0,0.0,1.0);vWorldDepth=-wp.y;}`,
 `#version 300 es
-precision highp float;in vec2 vUV;in vec3 vC;in float vA;in float vDepth;out vec4 o;
-void main(){float r2=dot(vUV,vUV);if(r2>1.0)discard;float gaussian=exp(-r2*3.45);float edge=1.0-smoothstep(.62,1.0,r2);float a=gaussian*edge*vA;if(a<.008)discard;vec3 c=vC*(.94+.14*(1.0-r2));c=mix(c,vec3(.015,.035,.060),vDepth*.12);o=vec4(c,a);}`);
+precision highp float;in vec2 vUV;in vec3 vC;in float vA;in float vDepth;in float vWorldDepth;uniform float markerDepth;out vec4 o;
+void main(){float r2=dot(vUV,vUV);if(r2>1.0)discard;float gaussian=exp(-r2*3.45);float edge=1.0-smoothstep(.62,1.0,r2);float a=gaussian*edge*vA;if(a<.008)discard;vec3 c=vC*(.94+.14*(1.0-r2));c=mix(c,vec3(.015,.035,.060),vDepth*.12);float slice=1.-smoothstep(.12,.52,abs(vWorldDepth-markerDepth));c=mix(c,vec3(1.,.31,.075),slice);a=max(a,slice*.94);o=vec4(c,a);}`);
 const waterProg=makeProgram(`#version 300 es
-precision highp float;layout(location=0)in vec3 p;uniform mat4 mvp;uniform float time;out float pulse;void main(){vec3 q=p;q.y+=sin(q.x*.18+time*1.18)*.10+cos(q.z*.21-time*.88)*.075+sin((q.x+q.z)*.09+time*1.55)*.035;pulse=.5+.5*sin(q.x*.12+q.z*.15+time);gl_Position=mvp*vec4(q,1.);}`,`#version 300 es
-precision highp float;in float pulse;out vec4 o;void main(){vec3 c=mix(vec3(.08,.29,.46),vec3(.30,.74,.96),pulse);o=vec4(c,.20);}`);
+precision highp float;layout(location=0)in vec3 p;uniform mat4 mvp;uniform float time;out float pulse;void main(){vec3 q=p;float w1=sin(q.x*.21+time*1.35),w2=cos(q.z*.26-time*1.08),w3=sin((q.x+q.z)*.12+time*1.8);q.y+=w1*.22+w2*.15+w3*.08;q.x+=cos(q.z*.16+time*.72)*.055;q.z+=sin(q.x*.14-time*.61)*.055;pulse=clamp(.5+.27*w1+.18*w2+.12*w3,0.,1.);gl_Position=mvp*vec4(q,1.);}`,`#version 300 es
+precision highp float;in float pulse;out vec4 o;void main(){vec3 c=mix(vec3(.035,.25,.44),vec3(.24,.82,1.),pulse);o=vec4(c,.16+pulse*.24);}`);
 const wireProg=makeProgram(`#version 300 es
-precision highp float;layout(location=0)in vec3 p;uniform mat4 mvp;out float dep;void main(){dep=clamp(-p.y/110.0,0.0,1.0);gl_Position=mvp*vec4(p,1.);}`,`#version 300 es
-precision highp float;in float dep;out vec4 o;void main(){vec3 shallow=vec3(.32,.86,1.0),deep=vec3(.10,.31,.56);vec3 c=mix(shallow,deep,dep);o=vec4(c,.58);}`);
+precision highp float;layout(location=0)in vec3 p;uniform mat4 mvp;out float dep;out float worldDepth;void main(){dep=clamp(-p.y/110.0,0.0,1.0);worldDepth=-p.y;gl_Position=mvp*vec4(p,1.);}`,`#version 300 es
+precision highp float;in float dep;in float worldDepth;uniform float markerDepth;out vec4 o;void main(){vec3 shallow=vec3(.32,.86,1.0),deep=vec3(.10,.31,.56);vec3 c=mix(shallow,deep,dep);float slice=1.-smoothstep(.12,.52,abs(worldDepth-markerDepth));c=mix(c,vec3(1.,.31,.075),slice);o=vec4(c,max(.58,slice));}`);
 const planeProg=makeProgram(`#version 300 es
 precision highp float;layout(location=0)in vec3 p;uniform mat4 mvp;uniform float markerDepth;void main(){vec3 q=p;q.y=-markerDepth;gl_Position=mvp*vec4(q,1.);}`,`#version 300 es
 precision highp float;out vec4 o;void main(){o=vec4(.26,.65,1.0,.08);}`);
@@ -1348,12 +1348,12 @@ $('#focusBack').onclick=overview;$('#rightFocusBack').onclick=overview;
 function resize(){const d=Math.min(devicePixelRatio||1,2),r=canvas.getBoundingClientRect(),w=Math.round(r.width*d),h=Math.round(r.height*d);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h)}}
 function render(){stepCameraAnimation();resize();gl.enable(gl.DEPTH_TEST);gl.depthMask(true);gl.clearColor(.006,.010,.018,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);const cp=Math.cos(camera.pitch),sp=Math.sin(camera.pitch),cy=Math.cos(camera.yaw),sy=Math.sin(camera.yaw),ex=camera.tx+camera.dist*cp*sy,ey=camera.ty+camera.dist*sp,ez=camera.tz+camera.dist*cp*cy,P=perspective(.78,canvas.width/canvas.height,.1,360),V=lookAt(ex,ey,ez,camera.tx,camera.ty,camera.tz),M=mul(P,V),now=performance.now(),focus=Math.min(1,(now-sceneFocusStart)/720);
   // Base geometry is retained for depth / occlusion. Rendering style varies by experiment spot.
-  gl.disable(gl.BLEND);gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1.2,1.4);gl.useProgram(terrainProg);gl.uniformMatrix4fv(gl.getUniformLocation(terrainProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(terrainProg,'spotMax'),SPOTS[active].max);gl.uniform1f(gl.getUniformLocation(terrainProg,'focus'),active===1?focus*.16:(active===2?focus*.28:focus));gl.bindVertexArray(terrainVao);gl.drawArrays(gl.TRIANGLES,0,terrainCount);gl.disable(gl.POLYGON_OFFSET_FILL);
+  gl.disable(gl.BLEND);gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1.2,1.4);gl.useProgram(terrainProg);gl.uniformMatrix4fv(gl.getUniformLocation(terrainProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(terrainProg,'spotMax'),SPOTS[active].max);gl.uniform1f(gl.getUniformLocation(terrainProg,'focus'),active===1?focus*.16:(active===2?focus*.28:focus));gl.uniform1f(gl.getUniformLocation(terrainProg,'markerDepth'),+$('#depth').value);gl.bindVertexArray(terrainVao);gl.drawArrays(gl.TRIANGLES,0,terrainCount);gl.disable(gl.POLYGON_OFFSET_FILL);
   if(active===2){
     // Blue Hole: detailed bathymetric wireframe comparison mode.
-    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.depthFunc(gl.LEQUAL);gl.useProgram(wireProg);gl.uniformMatrix4fv(gl.getUniformLocation(wireProg,'mvp'),false,new Float32Array(M));gl.bindVertexArray(wireVao);gl.drawArrays(gl.LINES,0,wireCount);gl.depthFunc(gl.LESS);
+    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.depthFunc(gl.LEQUAL);gl.useProgram(wireProg);gl.uniformMatrix4fv(gl.getUniformLocation(wireProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(wireProg,'markerDepth'),+$('#depth').value);gl.bindVertexArray(wireVao);gl.drawArrays(gl.LINES,0,wireCount);gl.depthFunc(gl.LESS);
   }else{
-    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.depthFunc(gl.LEQUAL);gl.useProgram(splatProg);gl.uniformMatrix4fv(gl.getUniformLocation(splatProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(splatProg,'focus'),focus);gl.bindVertexArray(splatVao);
+    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.depthFunc(gl.LEQUAL);gl.useProgram(splatProg);gl.uniformMatrix4fv(gl.getUniformLocation(splatProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(splatProg,'focus'),focus);gl.uniform1f(gl.getUniformLocation(splatProg,'markerDepth'),+$('#depth').value);gl.bindVertexArray(splatVao);
     if(active===1){
       // Islands: denser, smaller overlapping anisotropic splats; solid mesh is only a dark occlusion proxy.
       gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),1.52);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.26);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
@@ -1365,7 +1365,7 @@ function render(){stepCameraAnimation();resize();gl.enable(gl.DEPTH_TEST);gl.dep
     gl.depthFunc(gl.LESS);
   }
   gl.useProgram(waterProg);gl.uniformMatrix4fv(gl.getUniformLocation(waterProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(waterProg,'time'),now*.001);gl.bindVertexArray(waterVao);gl.drawArrays(gl.LINES,0,waterCount);
-  gl.useProgram(planeProg);gl.uniformMatrix4fv(gl.getUniformLocation(planeProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(planeProg,'markerDepth'),+$('#depth').value);gl.bindVertexArray(planeVao);gl.drawArrays(gl.TRIANGLES,0,6);gl.depthMask(true);gl.disable(gl.BLEND);lastM=M;updateHotspotPositions();requestAnimationFrame(render)}
+  gl.depthMask(true);gl.disable(gl.BLEND);lastM=M;updateHotspotPositions();requestAnimationFrame(render)}
 let drag=false,lastX=0,lastY=0,pan=false;canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;pan=e.shiftKey;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;if(pan||e.shiftKey){camera.tx-=dx*.035;camera.ty+=dy*.035}else{camera.yaw-=dx*.006;camera.pitch=Math.max(-1.35,Math.min(1.35,camera.pitch+dy*.006))}});canvas.addEventListener('pointerup',()=>drag=false);canvas.addEventListener('wheel',e=>{e.preventDefault();camera.dist=Math.max(18,Math.min(190,camera.dist*Math.exp(e.deltaY*.001)))},{passive:false});
 // Legacy technical controls are retained for DOM compatibility but terrain remains solid.
 $('#pointsBtn').onclick=()=>{};$('#wireBtn').onclick=()=>{};$('#fogBtn').onclick=()=>{};$('#resetBtn').onclick=()=>overview();[['reefLayer','reef'],['sandLayer','sand'],['wallLayer','wall'],['particlesLayer','particles']].forEach(([id,k])=>{const el=$('#'+id);if(el)el.onclick=()=>{}});const psz=$('#ptSize'),den=$('#density');if(psz)psz.disabled=true;if(den)den.disabled=true;
@@ -2722,5 +2722,23 @@ html,body{background:#050608!important;color:#f2f6fb!important}
   // The dolphin mini control is persistent, so the initial + delayed applies are sufficient.
 })();
 </script>
+
+<style id="v55-depth-slice-layout">
+/* Depth belongs to the map and controls the orange scan intersection. */
+.viewport .depthFloat{
+  left:auto!important;
+  right:18px!important;
+  top:18px!important;
+  bottom:auto!important;
+  width:218px!important;
+  border-color:rgba(255,91,24,.28)!important;
+  box-shadow:0 20px 60px rgba(0,0,0,.34),0 0 0 1px rgba(255,91,24,.04)!important;
+}
+.viewport .depthFloatKicker{color:rgba(255,150,108,.72)!important}
+.viewport .depthFloat input[type=range]{accent-color:#ff4f13!important}
+@media(max-width:980px){
+  .viewport .depthFloat{right:10px!important;top:10px!important;bottom:auto!important;width:min(218px,calc(100% - 20px))!important}
+}
+</style>
 
 </body></html>

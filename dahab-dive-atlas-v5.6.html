@@ -2794,9 +2794,10 @@ html,body{background:#050608!important;color:#f2f6fb!important}
 @media(min-width:981px){
   #spotHeader>#focusIntro{
     position:static!important;inset:auto!important;transform:none!important;
-    width:100%!important;margin:14px 0 0!important;padding:13px 0 14px!important;
-    border:0!important;border-top:1px solid rgba(114,214,255,.22)!important;border-radius:0!important;
-    background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;
+    width:100%!important;margin:14px 0 0!important;padding:14px 15px 15px!important;
+    border:1px solid rgba(255,255,255,.10)!important;border-radius:24px!important;
+    background:rgba(8,27,32,.88)!important;box-shadow:0 24px 75px rgba(0,0,0,.34)!important;
+    backdrop-filter:blur(26px) saturate(145%)!important;-webkit-backdrop-filter:blur(26px) saturate(145%)!important;
     opacity:0!important;visibility:hidden!important;max-height:0!important;overflow:hidden!important;
     transition:max-height .34s ease,opacity .2s ease,padding .25s ease!important;
   }
@@ -2806,7 +2807,12 @@ html,body{background:#050608!important;color:#f2f6fb!important}
   #spotHeader>#focusIntro p{font-size:10px!important;max-width:350px!important}
   #spotHeader>#focusIntro .focusVideos{display:none!important}
   #spotHeader.focusMenuPinned>.spotMenuV423{max-height:280px!important;margin-top:18px!important;opacity:1!important;transform:none!important;pointer-events:auto!important}
-  #spotHeader:has(>#focusIntro.visible):hover>#focusIntro{opacity:.16!important;pointer-events:none!important}
+  #spotHeader:has(>#focusIntro.visible)>.spotMenuV423,
+  #spotHeader:has(>#focusIntro.visible):hover>.spotMenuV423,
+  #spotHeader:has(>#focusIntro.visible):focus-within>.spotMenuV423{
+    max-height:0!important;margin-top:0!important;opacity:0!important;transform:translateY(-8px)!important;pointer-events:none!important;
+  }
+  #spotHeader:has(>#focusIntro.visible)::after{opacity:0!important}
 }
 </style>
 <script id="v57-focus-navigation">

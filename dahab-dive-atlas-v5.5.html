@@ -1011,9 +1011,9 @@ let waterVerts=[];     // line endpoints xyz
 let wireVerts=[];      // detailed line-map edges for the wireframe experiment
 let sceneBounds={x0:-40,x1:40,z0:-40,z1:40};
 const C={
-  reef:[0.115,0.185,0.205], reef2:[0.155,0.265,0.285], sand:[0.39,0.345,0.255],
-  wall:[0.075,0.125,0.145], wall2:[0.105,0.19,0.215], shore:[0.20,0.18,0.155],
-  coral:[0.16,0.29,0.29]
+  reef:[0.205,0.315,0.335], reef2:[0.255,0.405,0.425], sand:[0.50,0.445,0.335],
+  wall:[0.145,0.225,0.245], wall2:[0.185,0.305,0.335], shore:[0.29,0.255,0.215],
+  coral:[0.25,0.425,0.415]
 };
 function clamp01(v){return Math.max(0,Math.min(1,v))}
 function smooth(a,b,x){const t=clamp01((x-a)/(b-a));return t*t*(3-2*t)}
@@ -1115,7 +1115,7 @@ function genSolidPools(){
   gridSurface(-32,32,-28,38,.34,h,()=>true,color);
   for(const [cx,cz,r] of pools){for(let k=0;k<7;k++){const a=k/7*Math.PI*2+.35;coralCluster(cx+Math.cos(a)*(r+.9),h(cx+Math.cos(a)*(r+.9),cz+Math.sin(a)*(r+.9)),cz+Math.sin(a)*(r+.9),.72,C.coral,20+k+cz)}}
   for(let k=0;k<13;k++){const x=-14+k*2.3,z=17+3.4*Math.sin(k*.83);coralCluster(x,h(x,z),z,.58+(k%3)*.1,C.reef2,60+k)}
-  waterGrid(-35,35,-28,40,2.1,(x,z)=>z>-28);
+  waterGrid(-35,35,-28,40,5,(x,z)=>z>-28);
 }
 
 function genSolidIslands(){
@@ -1186,7 +1186,7 @@ function genSolidIslands(){
   // Small shore crack and rubble line; the rest of the labyrinth stays visibly open from above.
   const sx=-5.8, sz=-30.8;for(let k=0;k<7;k++)coralCluster(sx+(k-3)*.55,-1.25,sz+.15*Math.sin(k),.34,C.reef2,1300+k);
   for(let k=0;k<18;k++){const x=-27+k*3.0,z=27+4.0*Math.sin(k*.71);coralCluster(x,h(x,z),z,.42+.22*hash1(1800+k),C.reef2,1800+k)}
-  waterGrid(-36,36,-34,39,1.45,(x,z)=>z>-34);
+  waterGrid(-36,36,-34,39,5,(x,z)=>z>-34);
 }
 function genSolidBlue(){
   sceneBounds={x0:-45,x1:45,z0:-47,z1:60};
@@ -1217,7 +1217,7 @@ function genSolidBlue(){
   gridSurface(-36,36,39,59,.52,(x,z)=>-68-(z-39)*1.85+micro(x,z,.48),()=>true,()=>C.wall2);
   for(let k=0;k<22;k++){const a=(k/22)*Math.PI*2+.17,y=-7-k*1.85;if(y<-49&&y>-69)continue;const rr=r0+.8;coralCluster(Math.cos(a)*rr,y,Math.sin(a)*rr,.42+.25*hash1(300+k),C.wall2,300+k)}
   for(let k=0;k<14;k++){const x=-22+k*3.3,z=43+3*Math.sin(k*.7);coralCluster(x,-75-(z-39)*1.2,z,.65,C.wall2,340+k)}
-  waterGrid(-44,44,-30,48,2.2,(x,z)=>z>-30);
+  waterGrid(-44,44,-30,48,5,(x,z)=>z>-30);
 }
 
 function genSolidBells(){
@@ -1231,7 +1231,7 @@ function genSolidBells(){
   for(let y=-29;y<-.8;y+=.48){const depth=-y,half=2.0+2.2*Math.pow(depth/29,1.1),back=-8+7.3*Math.pow(depth/29,.78),yn=Math.min(y+.48,-.8),depthN=-yn,halfN=2.0+2.2*Math.pow(depthN/29,1.1),backN=-8+7.3*Math.pow(depthN/29,.78);quad([back,y,-half],[8.3,y,-half],[8.3,yn,-halfN],[backN,yn,-halfN],C.wall2);quad([8.3,y,half],[back,y,half],[backN,yn,halfN],[8.3,yn,halfN],C.wall2)}
   gridSurface(-8,8.2,-4.5,4.5,.34,(x,z)=>-2.4-26.3*smooth(-8,8,x)+micro(x,z,.12),()=>true,()=>C.sand);
   for(let k=0;k<16;k++){const x=-19+k*1.55,z=(k%2?1:-1)*(4.8+2.2*hash1(k*3.3));coralCluster(x,-1.2+micro(x,z,.18),z,.55+.18*(k%3),C.coral,410+k)}
-  waterGrid(-29,20,-31,31,2.0,(x,z)=>x>-29);
+  waterGrid(-29,20,-31,31,5,(x,z)=>x>-29);
 }
 
 function genSolidCanyon(){
@@ -1243,7 +1243,7 @@ function genSolidCanyon(){
   for(let z=-18;z<38;z+=.45){const zn=Math.min(z+.45,38),c0=center(z),c1=center(zn),w0=width(z),w1=width(zn),f0=floor(z),f1=floor(zn);for(let y=f0;y<-3;y+=.55){const yn=Math.min(y+.55,-3);const wob0=.28*fbm(z*.23,y*.06)+.16*Math.sin(y*.31+z*.19),wob1=.28*fbm(zn*.23,y*.06)+.16*Math.sin(y*.31+zn*.19);quad([c0-w0-wob0,y,z],[c1-w1-wob1,y,zn],[c1-w1-wob1,yn,zn],[c0-w0-wob0,yn,z],C.wall);quad([c0+w0+wob0,y,z],[c0+w0+wob0,yn,z],[c1+w1+wob1,yn,zn],[c1+w1+wob1,y,zn],C.wall)}for(let u=0;u<1;u+=.08){const un=Math.min(u+.08,1),x0=c0-w0+2*w0*u,x1=c0-w0+2*w0*un,x2=c1-w1+2*w1*un,x3=c1-w1+2*w1*u;quad([x0,f0+1.3*Math.abs(2*u-1),z],[x1,f0+1.3*Math.abs(2*un-1),z],[x2,f1+1.3*Math.abs(2*un-1),zn],[x3,f1+1.3*Math.abs(2*u-1),zn],C.sand)}}
   for(let k=0;k<24;k++){const z=-14+k*2.05,c=center(z),w=width(z),side=k%2?-1:1,x=c+side*(w+.45);coralCluster(x,floor(z)+5.5+2.5*hash1(500+k),z,.48+.2*(k%3),C.wall2,500+k)}
   for(let k=0;k<11;k++){const z=-10+k*4.1,c=center(z);coralCluster(c+(hash1(k*8.2)-.5)*2.2,floor(z)+.8,z,.38,C.sand,540+k)}
-  waterGrid(-38,38,-39,43,2.0,(x,z)=>z>-39);
+  waterGrid(-38,38,-39,43,5,(x,z)=>z>-39);
 }
 
 function buildDetailedWireframe(){
@@ -1287,7 +1287,7 @@ function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);g
 function makeProgram(vs,fs){const p=gl.createProgram();gl.attachShader(p,shader(gl.VERTEX_SHADER,vs));gl.attachShader(p,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p}
 const terrainProg=makeProgram(`#version 300 es
 precision highp float;layout(location=0)in vec3 p;layout(location=1)in vec3 n;layout(location=2)in vec3 c;uniform mat4 mvp;out vec3 vN;out vec3 vC;out vec3 vP;void main(){vN=n;vC=c;vP=p;gl_Position=mvp*vec4(p,1.);}`,`#version 300 es
-precision highp float;in vec3 vN;in vec3 vC;in vec3 vP;uniform float spotMax;uniform float focus;uniform float markerDepth;out vec4 o;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}void main(){vec3 N=normalize(vN);vec3 L=normalize(vec3(-.38,.80,.29));float nd=max(dot(N,L),0.);float wrap=.24+.76*nd;float slope=pow(1.-abs(N.y),1.25);float cavity=.78+.22*pow(abs(N.y),.55);float grain=.93+.09*h(floor(vP*2.4))+.04*sin(vP.x*1.7+vP.z*1.3);vec3 col=vC*wrap*cavity*grain;col+=vec3(.026,.060,.085)*slope;float dep=clamp(-vP.y/max(spotMax,1.),0.,1.);col=mix(col,vec3(.005,.014,.026),dep*.34);float rim=pow(max(dot(N,normalize(vec3(.42,.45,-.65))),0.),5.);col+=vec3(.035,.07,.09)*rim;col*=mix(.22,.34,focus);col=mix(col,vec3(.004,.010,.017),dep*.14);float slice=1.-smoothstep(.16,.62,abs(-vP.y-markerDepth));col=mix(col,vec3(1.,.31,.075),slice);o=vec4(col,1.);}`);
+precision highp float;in vec3 vN;in vec3 vC;in vec3 vP;uniform float spotMax;uniform float focus;uniform float markerDepth;out vec4 o;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}void main(){vec3 N=normalize(vN);vec3 L=normalize(vec3(-.38,.80,.29));float nd=max(dot(N,L),0.);float wrap=.38+.62*nd;float slope=pow(1.-abs(N.y),1.25);float cavity=.84+.16*pow(abs(N.y),.55);float grain=.95+.07*h(floor(vP*2.4))+.025*sin(vP.x*1.7+vP.z*1.3);vec3 col=vC*wrap*cavity*grain;col+=vec3(.045,.090,.115)*slope;float dep=clamp(-vP.y/max(spotMax,1.),0.,1.);col=mix(col,vec3(.012,.029,.045),dep*.22);float rim=pow(max(dot(N,normalize(vec3(.42,.45,-.65))),0.),5.);col+=vec3(.055,.10,.12)*rim;col*=mix(.52,.68,focus);col=mix(col,vec3(.008,.020,.030),dep*.08);float slice=1.-smoothstep(.035,.16,abs(-vP.y-markerDepth));col=mix(col,vec3(1.,.31,.075),slice*.92);o=vec4(col,1.);}`);
 const splatProg=makeProgram(`#version 300 es
 precision highp float;
 layout(location=0)in vec2 corner;
@@ -1302,7 +1302,7 @@ out vec2 vUV;out vec3 vC;out float vA;out float vDepth;out float vWorldDepth;
 void main(){vec3 wp=center+tangent*(corner.x*radii.x*scaleMul)+bitangent*(corner.y*radii.y*scaleMul);vec4 q=mvp*vec4(wp,1.);gl_Position=q;vUV=corner;vC=color;vA=alpha*alphaMul*mix(.70,1.0,focus);vDepth=clamp(-center.y/110.0,0.0,1.0);vWorldDepth=-wp.y;}`,
 `#version 300 es
 precision highp float;in vec2 vUV;in vec3 vC;in float vA;in float vDepth;in float vWorldDepth;uniform float markerDepth;out vec4 o;
-void main(){float r2=dot(vUV,vUV);if(r2>1.0)discard;float gaussian=exp(-r2*3.45);float edge=1.0-smoothstep(.62,1.0,r2);float a=gaussian*edge*vA;if(a<.008)discard;vec3 c=vC*(.94+.14*(1.0-r2));c=mix(c,vec3(.015,.035,.060),vDepth*.12);float slice=1.-smoothstep(.12,.52,abs(vWorldDepth-markerDepth));c=mix(c,vec3(1.,.31,.075),slice);a=max(a,slice*.94);o=vec4(c,a);}`);
+void main(){float r2=dot(vUV,vUV);if(r2>1.0)discard;float gaussian=exp(-r2*3.45);float edge=1.0-smoothstep(.62,1.0,r2);float a=gaussian*edge*vA;if(a<.008)discard;vec3 c=vC*(1.08+.16*(1.0-r2));c=mix(c,vec3(.025,.055,.078),vDepth*.08);float slice=1.-smoothstep(.025,.14,abs(vWorldDepth-markerDepth));c=mix(c,vec3(1.,.31,.075),slice*.90);a=max(a,slice*.72);o=vec4(c,a);}`);
 const waterProg=makeProgram(`#version 300 es
 precision highp float;layout(location=0)in vec3 p;uniform mat4 mvp;uniform float time;out float pulse;void main(){vec3 q=p;float w1=sin(q.x*.21+time*1.35),w2=cos(q.z*.26-time*1.08),w3=sin((q.x+q.z)*.12+time*1.8);q.y+=w1*.22+w2*.15+w3*.08;q.x+=cos(q.z*.16+time*.72)*.055;q.z+=sin(q.x*.14-time*.61)*.055;pulse=clamp(.5+.27*w1+.18*w2+.12*w3,0.,1.);gl_Position=mvp*vec4(q,1.);}`,`#version 300 es
 precision highp float;in float pulse;out vec4 o;void main(){vec3 c=mix(vec3(.035,.25,.44),vec3(.24,.82,1.),pulse);o=vec4(c,.16+pulse*.24);}`);
@@ -2725,6 +2725,8 @@ html,body{background:#050608!important;color:#f2f6fb!important}
 
 <style id="v55-depth-slice-layout">
 /* Depth belongs to the map and controls the orange scan intersection. */
+.waterScale{position:absolute;right:18px;top:174px;z-index:8;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(116,218,232,.20);border-radius:13px;background:rgba(7,25,30,.62);backdrop-filter:blur(15px);color:rgba(220,242,240,.50);font-size:7px;line-height:1.25;letter-spacing:.08em;pointer-events:none}
+.waterScale b{color:#dff8f3;font-size:9px;letter-spacing:.04em}.waterScaleCell{width:22px;height:22px;border:1px solid rgba(91,221,241,.68);background:rgba(49,177,205,.08);transform:skewY(-8deg)}
 .viewport .depthFloat{
   left:auto!important;
   right:18px!important;
@@ -2749,7 +2751,12 @@ html,body{background:#050608!important;color:#f2f6fb!important}
 @media(max-width:980px){
   .viewport .depthFloat{right:10px!important;top:10px!important;bottom:auto!important;width:min(218px,calc(100% - 20px))!important}
   .viewport .breathAdBubble,.viewport .dolphinTourAd,.viewport .dolphinTourMini{left:10px!important;right:auto!important}
+  .waterScale{right:10px;top:166px}
 }
 </style>
+
+<script>
+(()=>{const viewport=document.getElementById('viewport');if(!viewport||viewport.querySelector('.waterScale'))return;const scale=document.createElement('div');scale.className='waterScale mono';scale.innerHTML='<span class="waterScaleCell" aria-hidden="true"></span><span>WATER GRID<br><b>5 × 5 M</b></span>';viewport.appendChild(scale)})();
+</script>
 
 </body></html>

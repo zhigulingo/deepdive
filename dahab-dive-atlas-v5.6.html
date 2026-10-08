@@ -932,7 +932,7 @@ body{background:#061317;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Dis
 <header class="top"><div class="brand"><div class="mark">D</div><div><b>DAHAB / UNDERWATER ATLAS</b><small>SCAN VIEW · PROCEDURAL RECONSTRUCTION</small></div></div><div class="version mono"><span>V1 / FIELD GUIDE</span><strong>V4.30 / INTERFACE</strong></div></header>
 <div class="app">
 <aside class="left"><div class="caps sectionTitle">Споты / 01—05</div><nav class="spotlist" id="spotlist"></nav><div class="leftNote">V3 усиливает рельеф, маршруты и интерактивные ориентиры. Фото-пины показывают реальные снимки этих же дайв-сайтов; 3D-геометрия всё ещё является визуальной реконструкцией, а не навигационной батиметрией.</div><div class="legend"><div class="caps sectionTitle" style="margin-left:0">Материал</div><div class="legendRow"><i class="sw a"></i>риф / коралл</div><div class="legendRow"><i class="sw b"></i>песок / плато</div><div class="legendRow"><i class="sw c"></i>глубокая стенка</div></div></aside>
-<main class="viewport" id="viewport"><canvas id="gl"></canvas><div class="hud"><div class="hudTop"><div class="hudTitle spotHeader" id="spotHeader"><div class="caps mono" id="spotNo">SPOT 01 / 05</div><h1 id="spotName">Three Pools</h1><p id="spotSub">Три чаши в коралловом плато</p><div class="spotCoords" id="spotCoords">28.43559° N · 34.45779° E</div><div class="spotMenuV423" id="spotMenuV423" aria-label="Другие споты"></div><div class="spotHoverRail" id="spotHoverRail"></div></div><div class="scanBadge mono"><b>GEOMETRY LAB</b><br/><span id="pointCount">0</span><br/>V5.5 RELIEF STUDY</div></div><div class="cross"></div><div class="hotspots" id="hotspots"></div><div class="focusIntro" id="focusIntro"><div class="focusTop"><div class="focusEyebrow">LOCAL INTRO</div><button class="focusBack" id="focusBack">← Overview</button></div><h4 id="focusTitle">Point</h4><p id="focusText"></p><div class="focusStats"><div class="focusStat"><span>Depth</span><b id="focusDepth">—</b><small>approx.</small></div><div class="focusStat"><span>Transit</span><b id="focusTime">—</b><small>illustrative</small></div><div class="focusStat"><span>Pressure</span><b id="focusPressure">—</b><small>absolute</small></div></div><div class="focusHint">Transit time is a visual route estimate, not a breath-hold target or safety recommendation.</div><div class="focusVideos" id="focusVideos"></div></div><div class="routeHint mono" id="routeHint"><b>GEOMETRY NOTE</b><br/><span id="routeText"></span></div><div class="depthReadout mono">DEPTH LEVEL<b id="depthHud">3 M</b></div><div class="depthScale mono" id="depthScale"></div><div class="notice mono">ROTATE · ZOOM · INSPECT</div><div class="help mono">DRAG — ВРАЩЕНИЕ · SHIFT+DRAG — PAN · WHEEL/PINCH — ZOOM</div><div class="archLegend" id="archLegend" style="display:none"></div><div class="depthFloat"><div class="depthFloatTop"><div><div class="depthFloatKicker">DEPTH</div><div class="depthFloatValue"><span id="depthVal">3</span><small>m</small></div></div><div class="depthFloatMetrics"><span><b id="pressure">1.3</b> bar</span><span><b id="gas">77</b>% gas*</span></div></div><div class="rangeLabel mono"><span>0 M</span><span id="depthMax">20 M</span></div><input id="depth" max="20" min="0" step="1" type="range" value="3"/><div class="depthFloatNote">Illustrative pressure layer · not a breath-hold target</div></div><div class="controls"><button class="ctrl active" id="pointsBtn">POINT SPLATS</button><button class="ctrl" id="wireBtn">WIREFRAME</button><button class="ctrl active" id="fogBtn">DEPTH FOG</button><button class="ctrl" id="resetBtn">RESET VIEW</button></div></div></main>
+<main class="viewport" id="viewport"><canvas id="gl"></canvas><div class="hud"><div class="hudTop"><div class="hudTitle spotHeader" id="spotHeader"><div class="caps mono" id="spotNo">SPOT 01 / 05</div><h1 id="spotName">Three Pools</h1><p id="spotSub">Три чаши в коралловом плато</p><div class="spotCoords" id="spotCoords">28.43559° N · 34.45779° E</div><div class="spotContextPanel" id="spotContextPanel"><div class="spotMenuV423" id="spotMenuV423" aria-label="Другие споты"></div><div class="focusIntro" id="focusIntro"><div class="focusHeading"><div class="focusEyebrow">LOCAL INTRO</div><h4 id="focusTitle">Point</h4><button class="focusBack" id="focusBack">← Overview</button></div><p id="focusText"></p><div class="focusStats"><div class="focusStat"><span>Depth</span><b id="focusDepth">—</b><small>approx.</small></div><div class="focusStat"><span>Transit</span><b id="focusTime">—</b><small>illustrative</small></div><div class="focusStat"><span>Pressure</span><b id="focusPressure">—</b><small>absolute</small></div></div><div class="focusHint">Transit time is a visual route estimate, not a breath-hold target or safety recommendation.</div><div class="focusVideos" id="focusVideos"></div></div></div><div class="spotHoverRail" id="spotHoverRail"></div></div><div class="scanBadge mono"><b>GEOMETRY LAB</b><br/><span id="pointCount">0</span><br/>V5.5 RELIEF STUDY</div></div><div class="cross"></div><div class="hotspots" id="hotspots"></div><div class="routeHint mono" id="routeHint"><b>GEOMETRY NOTE</b><br/><span id="routeText"></span></div><div class="depthReadout mono">DEPTH LEVEL<b id="depthHud">3 M</b></div><div class="depthScale mono" id="depthScale"></div><div class="notice mono">ROTATE · ZOOM · INSPECT</div><div class="help mono">DRAG — ВРАЩЕНИЕ · SHIFT+DRAG — PAN · WHEEL/PINCH — ZOOM</div><div class="archLegend" id="archLegend" style="display:none"></div><div class="depthFloat"><div class="depthFloatTop"><div><div class="depthFloatKicker">DEPTH</div><div class="depthFloatValue"><span id="depthVal">3</span><small>m</small></div></div><div class="depthFloatMetrics"><span><b id="pressure">1.3</b> bar</span><span><b id="gas">77</b>% gas*</span></div></div><div class="rangeLabel mono"><span>0 M</span><span id="depthMax">20 M</span></div><input id="depth" max="20" min="0" step="1" type="range" value="3"/><div class="depthFloatNote">Illustrative pressure layer · not a breath-hold target</div></div><div class="controls"><button class="ctrl active" id="pointsBtn">POINT SPLATS</button><button class="ctrl" id="wireBtn">WIREFRAME</button><button class="ctrl active" id="fogBtn">DEPTH FOG</button><button class="ctrl" id="resetBtn">RESET VIEW</button></div></div></main>
 <aside class="right"><div class="inspectorHead"><div><span class="inspectorEyebrow">DAHAB / SPOT INSPECTOR</span><strong id="inspectorMode">Overview</strong></div></div><div class="localStats" id="localStats"><div class="localStatsTop"><div><span class="localKicker">FOCUS POINT</span><h2 id="localPointName">—</h2></div><button class="rightFocusBack" id="rightFocusBack">← Overview</button></div><div class="localMetricGrid"><div class="localMetric"><span>Depth</span><b id="localDepth">—</b><small>local point</small></div><div class="localMetric"><span>Pressure</span><b id="localPressure">—</b><small>absolute</small></div><div class="localMetric"><span>Transit</span><b id="localTransit">—</b><small>illustrative</small></div></div></div><div class="spotIntro" id="spotIntro"></div><div class="offerStack" id="mediaStack"><div class="promoCard videographerPoster" id="videographerPoster">
 <button aria-label="Close videographer banner" class="vgClose vgCloseDelayed" id="vgClose" type="button">×</button>
 <div class="vgHero">
@@ -2738,6 +2738,139 @@ html,body{background:#050608!important;color:#f2f6fb!important}
 .toggle{background:#0c1015!important;color:#9eacbb!important}.toggle.active{color:#dff5ff!important;border-color:#4eaed4!important}
 @media(max-width:980px){.left,.right,.top{background:#080a0d!important}}
 </style>
+<style id="v431-unified-title-panel">
+/* V4.31 — one stable title and one interchangeable panel for spot list / local intro. */
+#spotHeader.spotHeader{
+  width:clamp(390px,46vw,720px)!important;
+  max-width:calc(100vw - 410px)!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  transform:none!important;
+  overflow:visible!important;
+}
+#spotHeader.spotHeader::after{display:none!important}
+#spotHeader>#spotNo,#spotHeader>#spotName,#spotHeader>#spotSub,#spotHeader>#spotCoords{
+  position:static!important;
+  transform:none!important;
+  transition:none!important;
+}
+#spotHeader>#spotName{
+  display:block!important;
+  margin:8px 0 8px!important;
+  padding:0!important;
+  font-size:clamp(42px,5.05vw,72px)!important;
+  line-height:.94!important;
+  font-weight:680!important;
+  letter-spacing:-.058em!important;
+  font-variation-settings:normal!important;
+  white-space:nowrap!important;
+}
+#spotHeader:hover>#spotName,#spotHeader:focus-within>#spotName{
+  margin:8px 0 8px!important;
+  padding:0!important;
+  font-size:clamp(42px,5.05vw,72px)!important;
+  line-height:.94!important;
+  letter-spacing:-.058em!important;
+  transform:none!important;
+}
+.spotContextPanel{
+  position:absolute!important;
+  left:0!important;
+  top:calc(100% + 24px)!important;
+  width:min(650px,calc(100vw - 410px))!important;
+  z-index:340!important;
+  border:1px solid rgba(114,214,255,.14)!important;
+  border-radius:28px!important;
+  background:rgba(6,18,25,.86)!important;
+  box-shadow:0 28px 80px rgba(0,0,0,.42)!important;
+  backdrop-filter:blur(30px) saturate(135%)!important;
+  -webkit-backdrop-filter:blur(30px) saturate(135%)!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  transform:translateY(-8px)!important;
+  pointer-events:none!important;
+  transition:opacity .2s ease,transform .3s cubic-bezier(.2,.8,.2,1),visibility .2s!important;
+}
+#spotHeader:not(:has(.focusIntro.visible)):hover>.spotContextPanel,
+#spotHeader:not(:has(.focusIntro.visible)):focus-within>.spotContextPanel,
+#spotHeader:has(.focusIntro.visible)>.spotContextPanel{
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+  pointer-events:auto!important;
+}
+.spotContextPanel>.spotMenuV423{
+  position:static!important;
+  display:grid!important;
+  gap:6px!important;
+  width:100%!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:14px!important;
+  opacity:1!important;
+  overflow:visible!important;
+  transform:none!important;
+  pointer-events:auto!important;
+}
+#spotHeader:has(.focusIntro.visible) .spotMenuV423{display:none!important}
+.spotContextPanel .spotMenuV423Item{
+  grid-template-columns:minmax(0,1fr) 120px 150px!important;
+  gap:20px!important;
+  min-height:72px!important;
+  margin:0!important;
+  padding:13px 18px!important;
+  border:1px solid rgba(114,214,255,.08)!important;
+  border-radius:20px!important;
+  background:rgba(255,255,255,.025)!important;
+  opacity:.68!important;
+  transform:none!important;
+}
+.spotContextPanel .spotMenuV423Item:hover,.spotContextPanel .spotMenuV423Item:focus-visible{
+  padding-left:18px!important;
+  opacity:1!important;
+  transform:none!important;
+  background:rgba(114,214,255,.07)!important;
+}
+.spotContextPanel .spotMenuV423Name{font-size:20px!important}
+.spotContextPanel>.focusIntro{
+  position:static!important;
+  display:none!important;
+  width:100%!important;
+  margin:0!important;
+  padding:22px 26px 24px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+}
+.spotContextPanel>.focusIntro.visible{display:block!important}
+.focusHeading{display:flex!important;align-items:center!important;gap:16px!important;margin-bottom:12px!important}
+.focusHeading .focusEyebrow{flex:none;padding:8px 14px;border:1px solid rgba(114,214,255,.24);border-radius:999px;color:#bfeeff;font-size:8px}
+.focusHeading h4{margin:0!important;font-size:24px!important;line-height:1!important;white-space:nowrap}
+.focusHeading .focusBack{margin-left:auto;flex:none;height:44px;padding:0 20px;font-size:11px}
+.spotContextPanel .focusIntro>p{font-size:13px!important;line-height:1.6!important;color:rgba(224,236,246,.72)!important}
+.spotContextPanel .focusVideos{padding-top:14px;border-top:1px solid rgba(114,214,255,.12)}
+@media(max-width:980px){
+  #spotHeader.spotHeader{width:calc(100vw - 36px)!important;max-width:none!important}
+  #spotHeader>#spotName,#spotHeader:hover>#spotName{font-size:clamp(34px,10vw,52px)!important}
+  .spotContextPanel{top:calc(100% + 16px)!important;width:calc(100vw - 32px)!important;max-height:48vh!important;overflow:auto!important}
+  .spotContextPanel>.spotMenuV423{display:grid!important}
+  #spotHeader:has(.focusIntro.visible) .spotMenuV423{display:none!important}
+  .spotContextPanel .spotMenuV423Item{grid-template-columns:minmax(0,1fr) 72px 92px!important;gap:8px!important;min-height:58px!important;padding:10px 12px!important}
+  .spotContextPanel .spotMenuV423Name{font-size:15px!important}
+  .spotContextPanel>.focusIntro{padding:16px!important}
+}
+</style>
+
 <script id="v430-behavior">
 (()=>{
   const apply=()=>{

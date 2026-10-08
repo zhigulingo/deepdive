@@ -966,6 +966,15 @@ SPOTS.find(s=>s.id==='islands').maxPoint=[25,-22,23];
 SPOTS.find(s=>s.id==='blue').maxPoint=[0,-108,0];
 SPOTS.find(s=>s.id==='bells').maxPoint=[8,-48,18];
 SPOTS.find(s=>s.id==='canyon').maxPoint=[1,-36,37];
+const islandsSpot=SPOTS.find(s=>s.id==='islands');
+islandsSpot.sub='Короткий входной тоннель → открытые песчаные бассейны и коралловые каналы';
+islandsSpot.morph='Потолок есть только над коротким входом. Весь основной maze открыт к поверхности: светлый песок лежит между отдельными коралловыми башнями и блоками.';
+islandsSpot.route='Берег → единственный крытый участок: entry tunnel ~5 м / ~2 м глубины → три открытых песчаных бассейна 7–10 м → открытый сверху лабиринт между коралловыми блоками → внешние underwater islands до ~20 м.';
+islandsSpot.intro='Короткий крытый вход выводит в открытый сверху рельеф: три светлых песчаных бассейна, каналы и дворы между крупными коралловыми блоками.';
+islandsSpot.tags=['7–20 M','PALE SAND FLOOR','OPEN-TOP MAZE','5 M ENTRY TUNNEL'];
+islandsSpot.markers[0].x=-12;islandsSpot.markers[0].y=-2;islandsSpot.markers[0].z=-30.5;islandsSpot.markers[0].label='ENTRY TUNNEL / 2 M';islandsSpot.markers[0].text='Единственный крытый участок: короткий проход около 5 м длиной в мелководной трещине рифовой плиты.';
+islandsSpot.markers[1].label='OPEN MAZE / 8 M';islandsSpot.markers[1].text='Открытые к поверхности песчаные улицы между высокими коралловыми блоками. Над maze нет сплошного потолка.';
+islandsSpot.markers[2].label='OPEN SAND LAGOON / 9 M';islandsSpot.markers[2].text='Освещённая сверху песчаная лагуна между коралловыми массивами; это двор, а не подводная пещера.';
 const $=s=>document.querySelector(s); let active=0, pointSize=1.3, density=1, showFog=true, showPoints=true, showWire=false; const layers={reef:true,sand:true,wall:true,particles:true};
 const SPOT_RATINGS={pools:{rating:4.5,reviews:1747},islands:{rating:4.9,reviews:123},blue:{rating:4.7,reviews:2834},bells:{rating:4.7,reviews:113},canyon:{rating:4.5,reviews:49}};
 const SPOT_REVIEW_HINTS={pools:{text:'Beautiful place for snorkeling and chilling with friends. Great view as well.',source:'Google review · Jan 2025'},islands:{text:'Recent visitor feedback highlights the coral gardens and maze-like formations.',source:'Google reviews'},blue:{text:'Iconic free dive spot. Must visit for any divers.',source:'Google review · Nov 2025'},bells:{text:'One of the most beautiful places in the world for diving and snorkeling.',source:'Google review · Dec 2023'},canyon:{text:'Recent visitor feedback is available on Google Maps.',source:'Google reviews'}};
@@ -1186,7 +1195,8 @@ function genSolidIslands(){
   const color=(x,z)=>{
     const inPool=pools.some(p=>poolShape(x,z,p)<.94);
     const sandy=inPool||nearestChannel(x,z)<.35||(z>20&&extDist(x,z)<4.5);
-    return sandy?[.34,.32,.27]:(z>19?C.reef2:[.12,.27,.28]);
+    // Strong cartographic separation: pale sand is the navigable floor, teal relief is living coral.
+    return sandy?[.76,.64,.42]:(z>19?[.22,.43,.46]:[.10,.34,.34]);
   };
   const reefMask=(x,z)=>Math.hypot(x*.84,z-1)<38+1.8*n2(x*.12,z*.12);
   gridSurface(-34,34,-33,37,.22,h,reefMask,color);
@@ -1210,6 +1220,9 @@ function genSolidIslands(){
   wallStrip(null,null,28,10,(u,v)=>[ex-half,floor+(roof-floor)*v,z0+(z1-z0)*u],C.reef2);
   wallStrip(null,null,28,10,(u,v)=>[ex+half,floor+(roof-floor)*v,z0+(z1-z0)*u],C.reef2);
   wallStrip(null,null,28,18,(u,v)=>{const a=Math.PI*v;return[ex+Math.cos(a)*half,roof+.45*Math.sin(a),z0+(z1-z0)*u]},C.reef2);
+
+  // A pale sand apron makes it visually explicit where the roof ends and the open-air pool system begins.
+  gridSurface(-15.5,-8.5,-27.8,-23.7,.22,(x,z)=>-3.1-.72*(z+27.8)+.05*n2(x,z),()=>true,()=>[.78,.66,.44]);
 
   // Small shore crack and rubble line; the rest of the labyrinth stays visibly open from above.
   const sx=-5.8, sz=-30.8;for(let k=0;k<7;k++)coralCluster(sx+(k-3)*.55,-1.25,sz+.15*Math.sin(k),.34,C.reef2,1300+k);

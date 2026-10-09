@@ -2983,7 +2983,7 @@ html,body{background:#050608!important;color:#f2f6fb!important}
 (()=>{
   const header=document.getElementById('spotHeader'),focus=document.getElementById('focusIntro'),menu=document.getElementById('spotMenuV423'),viewport=document.getElementById('viewport'),spotNo=document.getElementById('spotNo');
   if(!header||!focus||!menu||!viewport)return;
-  header.insertBefore(focus,menu);
+  if(focus.parentNode!==menu.parentNode)menu.parentNode.insertBefore(focus,menu);
   const focusTop=focus.querySelector('.focusTop'),focusEyebrow=focus.querySelector('.focusEyebrow'),focusTitle=focus.querySelector('#focusTitle'),focusText=focus.querySelector('#focusText');
   if(focusTop&&focusEyebrow&&focusTitle&&!focus.querySelector('.focusHeading')){const heading=document.createElement('div');heading.className='focusHeading';focus.insertBefore(heading,focusTop);heading.append(focusEyebrow,focusTitle);focusTop.classList.add('focusActions')}
   if(focusText&&!focus.querySelector('#focusTagHints')){const hints=document.createElement('div');hints.className='focusTagHints';hints.id='focusTagHints';focusText.after(hints)}
@@ -2997,4 +2997,78 @@ html,body{background:#050608!important;color:#f2f6fb!important}
 })();
 </script>
 
+<style id="v58-unified-title-panel">
+/* V5.8 — the spot title and its menu/local intro are one stable glass surface. */
+@media (min-width:981px){
+  #spotHeader.spotHeader,
+  #spotHeader.spotHeader:hover,
+  #spotHeader.spotHeader:focus-within{
+    width:min(700px,calc(100vw - 430px))!important;
+    max-width:none!important;
+    padding:22px 24px 24px!important;
+    border:1px solid transparent!important;
+    border-radius:30px!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    transform:none!important;
+    transition:background .2s ease,border-color .2s ease,box-shadow .2s ease!important;
+  }
+  #spotHeader.spotHeader:hover,
+  #spotHeader.spotHeader:focus-within,
+  #spotHeader.spotHeader:has(.focusIntro.visible){
+    border-color:rgba(114,214,255,.14)!important;
+    background:rgba(6,18,25,.86)!important;
+    box-shadow:0 28px 80px rgba(0,0,0,.42)!important;
+    backdrop-filter:blur(30px) saturate(135%)!important;
+    -webkit-backdrop-filter:blur(30px) saturate(135%)!important;
+  }
+  #spotHeader.spotHeader::after{display:none!important}
+  #spotHeader>#spotName,
+  #spotHeader:hover>#spotName,
+  #spotHeader:focus-within>#spotName{
+    margin:8px 0!important;
+    font-size:52px!important;
+    line-height:.95!important;
+    transform:none!important;
+  }
+  #spotHeader>.spotContextPanel{
+    position:static!important;
+    width:100%!important;
+    margin:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    overflow:hidden!important;
+    transform:none!important;
+  }
+  #spotHeader:not(:has(.focusIntro.visible)):hover>.spotContextPanel,
+  #spotHeader:not(:has(.focusIntro.visible)):focus-within>.spotContextPanel,
+  #spotHeader:has(.focusIntro.visible)>.spotContextPanel{
+    margin-top:18px!important;
+    padding-top:14px!important;
+    border-top:1px solid rgba(114,214,255,.12)!important;
+  }
+  .spotContextPanel>.spotMenuV423{padding:0!important}
+  .spotContextPanel>.focusIntro{padding:0!important}
+}
+@media (max-width:980px){
+  #spotHeader.spotHeader{
+    padding:15px!important;
+    border-radius:22px!important;
+  }
+  #spotHeader.spotHeader:has(.focusIntro.visible){
+    border:1px solid rgba(114,214,255,.14)!important;
+    background:rgba(6,18,25,.88)!important;
+    box-shadow:0 22px 60px rgba(0,0,0,.38)!important;
+    backdrop-filter:blur(26px) saturate(135%)!important;
+    -webkit-backdrop-filter:blur(26px) saturate(135%)!important;
+  }
+  #spotHeader>.spotContextPanel{position:static!important;width:100%!important;margin-top:14px!important}
+}
+</style>
 </body></html>

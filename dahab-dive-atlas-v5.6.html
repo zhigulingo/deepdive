@@ -1299,10 +1299,11 @@ function buildDetailedWireframe(){
   }
 }
 function buildIslandGaussianDense(){
-  // Re-sample the source-grounded Islands geometry more densely than the generic synthetic shell.
+  // Islands uses a true multi-scale surfel cloud: the mesh only provides continuous depth/occlusion,
+  // while the visible reef is reconstructed from many small, irregular gaussian discs.
   splatVerts.length=0;
   const tris=terrainVerts.length/27;if(!tris)return;
-  const target=76000, samples=3, step=Math.max(1,Math.ceil(tris*samples/target));
+  const target=128000, samples=5, step=Math.max(1,Math.ceil(tris*samples/target));
   const emit=(b,u,v,seed)=>{
     if(u+v>1){u=1-u;v=1-v}const w=1-u-v;
     const q=(off,k)=>terrainVerts[b+off+k];
@@ -1313,9 +1314,12 @@ function buildIslandGaussianDense(){
     let bx=ny*tz-nz*ty,by=nz*tx-nx*tz,bz=nx*ty-ny*tx,bl=Math.hypot(bx,by,bz)||1;bx/=bl;by/=bl;bz/=bl;
     const ang=hash1(seed*5.31)*Math.PI*2,ca=Math.cos(ang),sa=Math.sin(ang),rtx=tx*ca+bx*sa,rty=ty*ca+by*sa,rtz=tz*ca+bz*sa,rbx=-tx*sa+bx*ca,rby=-ty*sa+by*ca,rbz=-tz*sa+bz*ca;
     const sand=r>.28&&g>.23&&bc<.30, steep=Math.abs(ny)<.55;
-    const base=sand?.19:(steep?.14:.16), rx=base*(.82+.58*hash1(seed*7.7)), ry=base*(.34+.40*hash1(seed*11.2));
-    const tone=.86+.25*hash1(seed*3.4), alpha=(sand?.74:.86)*(.88+.10*hash1(seed*13.7));
-    splatVerts.push(px+nx*.018,py+ny*.018,pz+nz*.018,rtx,rty,rtz,rbx,rby,rbz,r*tone,g*tone,bc*tone,rx,ry,alpha);
+    const base=sand?.135:(steep?.105:.12), rx=base*(.60+.82*hash1(seed*7.7)), ry=base*(.28+.48*hash1(seed*11.2));
+    const tone=.82+.34*hash1(seed*3.4), alpha=(sand?.78:.93)*(.88+.10*hash1(seed*13.7));
+    const edge=1-smooth(25,49,Math.hypot(px*.86,pz-1));
+    const sandCol=[.82,.68,.43],reefCol=steep?[.075,.34,.39]:[.10,.48,.44],mix=.34+.52*hash1(seed*4.9);
+    const cr=(sand?sandCol[0]:reefCol[0])*mix+r*(1-mix),cg=(sand?sandCol[1]:reefCol[1])*mix+g*(1-mix),cb=(sand?sandCol[2]:reefCol[2])*mix+bc*(1-mix);
+    splatVerts.push(px+nx*(.014+.035*hash1(seed*2.2)),py+ny*.018,pz+nz*.018,rtx,rty,rtz,rbx,rby,rbz,cr*tone,cg*tone,cb*tone,rx*(.42+.58*edge),ry*(.42+.58*edge),alpha*(.18+.82*edge));
   };
   for(let ti=0;ti<tris;ti+=step){const b=ti*27;for(let j=0;j<samples;j++)emit(b,hash1(ti*1.37+j*17.1),hash1(ti*2.73+j*29.7),ti*9.1+j*71.3);}
 }
@@ -1328,7 +1332,7 @@ function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);g
 function makeProgram(vs,fs){const p=gl.createProgram();gl.attachShader(p,shader(gl.VERTEX_SHADER,vs));gl.attachShader(p,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p}
 const terrainProg=makeProgram(`#version 300 es
 precision highp float;layout(location=0)in vec3 p;layout(location=1)in vec3 n;layout(location=2)in vec3 c;uniform mat4 mvp;out vec3 vN;out vec3 vC;out vec3 vP;void main(){vN=n;vC=c;vP=p;gl_Position=mvp*vec4(p,1.);}`,`#version 300 es
-precision highp float;in vec3 vN;in vec3 vC;in vec3 vP;uniform float spotMax;uniform float focus;uniform float markerDepth;uniform float mapMode;out vec4 o;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}void main(){vec3 N=normalize(vN);vec3 L=normalize(vec3(-.38,.80,.29));float nd=max(dot(N,L),0.);float wrap=.38+.62*nd;float slope=pow(1.-abs(N.y),1.25);float cavity=.84+.16*pow(abs(N.y),.55);float grain=.95+.07*h(floor(vP*2.4))+.025*sin(vP.x*1.7+vP.z*1.3);vec3 col=vC*wrap*cavity*grain;col+=vec3(.045,.090,.115)*slope;float dep=clamp(-vP.y/max(spotMax,1.),0.,1.);col=mix(col,vec3(.012,.029,.045),dep*.22);float rim=pow(max(dot(N,normalize(vec3(.42,.45,-.65))),0.),5.);col+=vec3(.055,.10,.12)*rim;col*=mix(.52,.68,focus);col=mix(col,vec3(.008,.020,.030),dep*.08);if(mapMode>.5){float sandish=step(.48,vC.r)*step(vC.b,.50);vec3 sand=mix(vec3(.77,.61,.35),vec3(.50,.37,.20),dep);vec3 reef=mix(vec3(.12,.52,.48),vec3(.055,.20,.28),dep);float relief=.58+.60*nd+.20*rim-.12*slope;col=mix(reef,sand,sandish)*relief;float cf=abs(fract((-vP.y+.025)/2.0)-.5);float contour=smoothstep(.455,.495,cf);col*=mix(1.0,.64,contour*.54);float major=abs(fract((-vP.y+.025)/10.0)-.5);float majorLine=smoothstep(.472,.499,major);col=mix(col,vec3(.015,.055,.065),majorLine*.46);col+=vec3(.035,.07,.065)*grain;}float slice=1.-smoothstep(.035,.16,abs(-vP.y-markerDepth));col=mix(col,vec3(1.,.31,.075),slice*.92);o=vec4(col,1.);}`);
+precision highp float;in vec3 vN;in vec3 vC;in vec3 vP;uniform float spotMax;uniform float focus;uniform float markerDepth;uniform float mapMode;out vec4 o;float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}void main(){vec3 N=normalize(vN);vec3 L=normalize(vec3(-.38,.80,.29));float nd=max(dot(N,L),0.);float wrap=.38+.62*nd;float slope=pow(1.-abs(N.y),1.25);float cavity=.84+.16*pow(abs(N.y),.55);float grain=.95+.07*h(floor(vP*2.4))+.025*sin(vP.x*1.7+vP.z*1.3);vec3 col=vC*wrap*cavity*grain;col+=vec3(.045,.090,.115)*slope;float dep=clamp(-vP.y/max(spotMax,1.),0.,1.);col=mix(col,vec3(.012,.029,.045),dep*.22);float rim=pow(max(dot(N,normalize(vec3(.42,.45,-.65))),0.),5.);col+=vec3(.055,.10,.12)*rim;col*=mix(.52,.68,focus);col=mix(col,vec3(.008,.020,.030),dep*.08);if(mapMode>.5){float sandish=step(.48,vC.r)*step(vC.b,.50);vec3 sand=mix(vec3(.77,.61,.35),vec3(.50,.37,.20),dep);vec3 reef=mix(vec3(.12,.52,.48),vec3(.055,.20,.28),dep);float relief=.58+.60*nd+.20*rim-.12*slope;col=mix(reef,sand,sandish)*relief;float cf=abs(fract((-vP.y+.025)/2.0)-.5);float contour=smoothstep(.455,.495,cf);col*=mix(1.0,.64,contour*.54);float major=abs(fract((-vP.y+.025)/10.0)-.5);float majorLine=smoothstep(.472,.499,major);col=mix(col,vec3(.015,.055,.065),majorLine*.46);col=(col*.24)+vec3(.006,.018,.025);}float slice=1.-smoothstep(.035,.16,abs(-vP.y-markerDepth));col=mix(col,vec3(1.,.31,.075),slice*.92);o=vec4(col,1.);}`);
 const splatProg=makeProgram(`#version 300 es
 precision highp float;
 layout(location=0)in vec2 corner;
@@ -1397,9 +1401,11 @@ function render(){stepCameraAnimation();resize();gl.enable(gl.DEPTH_TEST);gl.dep
   }else{
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.depthFunc(gl.LEQUAL);gl.useProgram(splatProg);gl.uniformMatrix4fv(gl.getUniformLocation(splatProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(splatProg,'focus'),focus);gl.uniform1f(gl.getUniformLocation(splatProg,'markerDepth'),+$('#depth').value);gl.bindVertexArray(splatVao);
     if(active===1){
-      // Islands: denser, smaller overlapping anisotropic splats; solid mesh is only a dark occlusion proxy.
-      gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),1.12);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.28);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
-      gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),.58);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.82);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
+      // Islands: a soft volumetric halo plus two crisp surfel layers. The continuous dark proxy
+      // prevents holes, but the eye reads the scene as a gaussian point reconstruction.
+      gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),1.38);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.13);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
+      gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),.62);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.72);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
+      gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),.30);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.96);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
     }else{
       gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),1.85);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.16);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
       gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),1.00);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.70);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);

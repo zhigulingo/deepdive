@@ -1340,7 +1340,7 @@ layout(location=5)in vec2 radii;
 layout(location=6)in float alpha;
 uniform mat4 mvp;uniform float focus;uniform float scaleMul;uniform float alphaMul;
 out vec2 vUV;out vec3 vC;out float vA;out float vDepth;out float vWorldDepth;
-void main(){vec3 wp=center+tangent*(corner.x*radii.x*scaleMul)+bitangent*(corner.y*radii.y*scaleMul);vec4 q=mvp*vec4(wp,1.);gl_Position=q;vUV=corner;vC=color;vA=alpha*alphaMul*mix(.70,1.0,focus);vDepth=clamp(-center.y/110.0,0.0,1.0);vWorldDepth=-wp.y;}`,
+void main(){float edge=1.0-smoothstep(34.0,61.0,length(center.xz));float edgeScale=mix(.34,1.0,edge);vec3 wp=center+tangent*(corner.x*radii.x*scaleMul*edgeScale)+bitangent*(corner.y*radii.y*scaleMul*edgeScale);vec4 q=mvp*vec4(wp,1.);gl_Position=q;vUV=corner;vC=color;vA=alpha*alphaMul*mix(.70,1.0,focus)*edge;vDepth=clamp(-center.y/110.0,0.0,1.0);vWorldDepth=-wp.y;}`,
 `#version 300 es
 precision highp float;in vec2 vUV;in vec3 vC;in float vA;in float vDepth;in float vWorldDepth;uniform float markerDepth;out vec4 o;
 void main(){float r2=dot(vUV,vUV);if(r2>1.0)discard;float gaussian=exp(-r2*3.45);float edge=1.0-smoothstep(.62,1.0,r2);float a=gaussian*edge*vA;if(a<.008)discard;vec3 c=vC*(1.08+.16*(1.0-r2));c=mix(c,vec3(.025,.055,.078),vDepth*.08);float slice=1.-smoothstep(.025,.14,abs(vWorldDepth-markerDepth));c=mix(c,vec3(1.,.31,.075),slice*.90);a=max(a,slice*.72);o=vec4(c,a);}`);
@@ -1398,14 +1398,15 @@ function render(){stepCameraAnimation();resize();gl.enable(gl.DEPTH_TEST);gl.dep
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.depthFunc(gl.LEQUAL);gl.useProgram(splatProg);gl.uniformMatrix4fv(gl.getUniformLocation(splatProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(splatProg,'focus'),focus);gl.uniform1f(gl.getUniformLocation(splatProg,'markerDepth'),+$('#depth').value);gl.bindVertexArray(splatVao);
     if(active===1){
       // Islands: denser, smaller overlapping anisotropic splats; solid mesh is only a dark occlusion proxy.
-      gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),1.38);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.10);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
-      gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),.72);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.30);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
+      gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),1.12);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.28);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
+      gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),.58);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.82);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
     }else{
       gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),1.85);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.16);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
       gl.uniform1f(gl.getUniformLocation(splatProg,'scaleMul'),1.00);gl.uniform1f(gl.getUniformLocation(splatProg,'alphaMul'),.70);gl.drawArraysInstanced(gl.TRIANGLE_STRIP,0,4,splatCount);
     }
     gl.depthFunc(gl.LESS);
   }
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.useProgram(planeProg);gl.uniformMatrix4fv(gl.getUniformLocation(planeProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(planeProg,'markerDepth'),0);gl.bindVertexArray(planeVao);gl.drawArrays(gl.TRIANGLES,0,6);
   gl.useProgram(waterProg);gl.uniformMatrix4fv(gl.getUniformLocation(waterProg,'mvp'),false,new Float32Array(M));gl.uniform1f(gl.getUniformLocation(waterProg,'time'),now*.001);gl.bindVertexArray(waterVao);gl.drawArrays(gl.LINES,0,waterCount);
   gl.depthMask(true);gl.disable(gl.BLEND);lastM=M;updateHotspotPositions();requestAnimationFrame(render)}
 let drag=false,lastX=0,lastY=0,pan=false;canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;pan=e.shiftKey;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;if(pan||e.shiftKey){camera.tx-=dx*.035;camera.ty+=dy*.035}else{camera.yaw-=dx*.006;camera.pitch=Math.max(-1.35,Math.min(1.35,camera.pitch+dy*.006))}});canvas.addEventListener('pointerup',()=>drag=false);canvas.addEventListener('wheel',e=>{e.preventDefault();camera.dist=Math.max(18,Math.min(190,camera.dist*Math.exp(e.deltaY*.001)))},{passive:false});
@@ -3220,6 +3221,59 @@ html,body{background:#050608!important;color:#f2f6fb!important}
   if(back)back.onclick=()=>{if(typeof overview==='function')overview()};
   if(rightBack)rightBack.onclick=()=>{if(typeof overview==='function')overview()};
   if(header)header.classList.remove('focusMenuPinned');
+})();
+</script>
+<style id="v61-stable-map-layout-and-dialogs">
+/* V6.1 — one coordinate system for overview/menu/focus, point-cloud map edges and Sataya dialog. */
+@media (min-width:981px){
+  .hudTop{padding:40px 50px!important}
+  #spotHeader.spotHeader{width:min(650px,calc(100vw - 500px))!important}
+  #spotHeader.focusMode{min-height:178px!important}
+  #spotHeader.focusMode .focusIntro.visible{min-height:178px!important}
+  .viewport .depthFloat{top:40px!important;right:50px!important}
+  .scanBadge{margin-top:0!important}
+  .routeHint{left:50px!important}.notice{left:24px!important}
+  .depthScale{left:50px!important;bottom:40px!important}
+  .controls{right:50px!important;bottom:40px!important}.help{bottom:42px!important}
+  .viewport .breathAdBubble,.viewport .dolphinTourAd,.viewport .dolphinTourMini{left:50px!important}
+}
+#gl{-webkit-mask-image:radial-gradient(ellipse 94% 92% at 50% 48%,#000 66%,rgba(0,0,0,.92) 76%,rgba(0,0,0,.42) 91%,transparent 100%);mask-image:radial-gradient(ellipse 94% 92% at 50% 48%,#000 66%,rgba(0,0,0,.92) 76%,rgba(0,0,0,.42) 91%,transparent 100%)}
+#spotHeader.focusMode .focusIntro.visible{box-sizing:border-box!important;padding:12px!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:22px!important;background:rgba(8,24,30,.90)!important;box-shadow:0 24px 70px rgba(0,0,0,.34)!important;backdrop-filter:blur(24px) saturate(135%)!important}
+.focusPreviewCard{display:grid;grid-template-columns:148px minmax(0,1fr);gap:14px;align-items:stretch}
+.focusPreviewMedia{position:relative;min-height:148px;border-radius:15px;overflow:hidden;background:#0b242a}
+.focusPreviewMedia img{width:100%;height:100%;object-fit:cover;display:block}
+.focusPreviewMedia:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.38))}
+.focusPreviewBody{min-width:0;display:flex;flex-direction:column}
+#spotHeader.focusMode .focusPreviewBody .focusHeading{margin:0 0 10px!important}
+#spotHeader.focusMode .focusPreviewBody #focusTitle{font-size:25px!important;line-height:1.02!important}
+#spotHeader.focusMode .focusPreviewBody #focusText{font-size:10px!important;margin-bottom:12px!important}
+#spotHeader.focusMode .focusPreviewBody .focusStats{margin-top:auto!important;max-width:none!important}
+#spotHeader.focusMode .focusPreviewBody .focusHint{display:none!important}
+.satayaModal{position:absolute;inset:0;z-index:900;display:grid;place-items:center;padding:42px;box-sizing:border-box;background:rgba(1,8,13,.54);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,visibility .18s}
+.satayaModal.open{opacity:1;visibility:visible;pointer-events:auto}
+.satayaDialog{position:relative;width:min(560px,92%);overflow:hidden;border:1px solid rgba(255,255,255,.14);border-radius:30px;background:rgba(5,22,28,.96);box-shadow:0 35px 110px rgba(0,0,0,.58);color:#eef9f7}
+.satayaMedia{position:relative;height:230px;overflow:hidden}.satayaMedia video{width:100%;height:100%;object-fit:cover}.satayaMedia:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,10,15,.04),rgba(5,22,28,.92))}
+.satayaContent{padding:0 28px 28px;margin-top:-42px;position:relative;z-index:2}.satayaKicker{color:#72d6ff;font:750 8px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em}.satayaContent h2{margin:9px 0 10px;font-size:34px;line-height:1;letter-spacing:-.045em}.satayaContent p{margin:0 0 14px;color:rgba(224,239,237,.72);font-size:12px;line-height:1.55}.satayaFacts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:18px 0}.satayaFacts span{padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:rgba(255,255,255,.045);color:rgba(239,249,247,.82);font-size:9px;line-height:1.35}.satayaCta{display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:999px;background:#eef9f7;color:#092027;text-decoration:none;font-size:11px;font-weight:780}.satayaClose{position:absolute;right:15px;top:15px;z-index:4;width:34px;height:34px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(5,18,24,.70);color:#fff;font-size:19px;cursor:pointer}
+@media(max-width:980px){.satayaModal{padding:14px}.satayaMedia{height:190px}.satayaContent{padding:0 18px 20px}.satayaFacts{grid-template-columns:1fr}.focusPreviewCard{grid-template-columns:1fr}.focusPreviewMedia{min-height:130px}}
+</style>
+<script id="v61-focus-preview-and-sataya-modal">
+(()=>{
+  const focus=document.getElementById('focusIntro');
+  if(focus&&!focus.querySelector('.focusPreviewCard')){
+    const heading=focus.querySelector('.focusHeading'),text=focus.querySelector('#focusText'),stats=focus.querySelector('.focusStats'),hint=focus.querySelector('.focusHint');
+    const card=document.createElement('div');card.className='focusPreviewCard';
+    const media=document.createElement('div');media.className='focusPreviewMedia';media.innerHTML='<img id="focusPreviewImage" alt="">';
+    const body=document.createElement('div');body.className='focusPreviewBody';
+    [heading,text,stats,hint].forEach(node=>node&&body.appendChild(node));card.append(media,body);focus.prepend(card);
+  }
+  const syncFocusPreview=()=>{if(typeof focusedMarker==='undefined'||!focusedMarker)return;const img=document.getElementById('focusPreviewImage');if(img){img.src=focusedMarker.img||'';img.alt=focusedMarker.photo||focusedMarker.label||''}};
+  document.getElementById('hotspots')?.addEventListener('click',e=>{if(e.target.closest('.hotspot.rich'))requestAnimationFrame(syncFocusPreview)});
+  document.getElementById('facts')?.addEventListener('click',()=>requestAnimationFrame(syncFocusPreview));
+
+  const vp=document.getElementById('viewport');
+  const createModal=()=>{let modal=document.getElementById('satayaModal');if(modal)return modal;modal=document.createElement('div');modal.id='satayaModal';modal.className='satayaModal';modal.setAttribute('aria-hidden','true');modal.innerHTML=`<section class="satayaDialog" role="dialog" aria-modal="true" aria-labelledby="satayaTitle"><button class="satayaClose" type="button" aria-label="Закрыть">×</button><div class="satayaMedia"></div><div class="satayaContent"><div class="satayaKicker">REEF SATAYA · RED SEA</div><h2 id="satayaTitle">День рядом с дельфинами</h2><p>Морской выход к рифу Сатайа: лагуна, свободное плавание, наблюдение за дельфинами в их естественной среде и время на рифе без спешки.</p><div class="satayaFacts"><span>Лагуна и коралловый риф</span><span>Встреча с дикими дельфинами</span><span>Сопровождение и день на лодке</span></div><a class="satayaCta" target="_blank" rel="noopener">Написать в Instagram ↗</a></div></section>`;vp.appendChild(modal);const close=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true')};modal.querySelector('.satayaClose').onclick=close;modal.addEventListener('pointerdown',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))close()});return modal};
+  const wireBanner=()=>{const ad=document.getElementById('dolphinTourAd');if(!ad||ad.dataset.modal61)return;ad.dataset.modal61='1';ad.removeAttribute('role');ad.setAttribute('role','button');ad.setAttribute('aria-label','Подробнее о туре на риф Сатайа');const modal=createModal(),source=ad.querySelector('video'),slot=modal.querySelector('.satayaMedia');if(source&&!slot.querySelector('video'))slot.appendChild(source.cloneNode(true));modal.querySelector('.satayaCta').href='https://ig.me/m/romeosintecho?text='+encodeURIComponent('меня интересуют дельфины / I want dalphine tour');const open=e=>{if(e.target?.closest?.('.dolphinTourClose'))return;e.preventDefault();e.stopImmediatePropagation();modal.classList.add('open');modal.setAttribute('aria-hidden','false');modal.querySelector('video')?.play().catch(()=>{});modal.querySelector('.satayaClose')?.focus()};ad.addEventListener('click',open,{capture:true});ad.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')open(e)},{capture:true});};
+  new MutationObserver(wireBanner).observe(vp,{childList:true,subtree:true});wireBanner();setTimeout(wireBanner,250);
 })();
 </script>
 </body></html>

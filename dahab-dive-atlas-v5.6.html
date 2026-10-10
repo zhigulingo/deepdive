@@ -3479,4 +3479,31 @@ html,body{background:#050608!important;color:#f2f6fb!important}
 <script id="v69-portfolio-autoplay">
 (()=>{const images=[1,2,3,4,5,6,7,8].map(n=>`https://romeofreediving.com/assets/photo${n}.jpg`);let index=0;const start=()=>{const hero=document.querySelector('#videographerPoster .vgHeroImg');if(!hero||hero.dataset.autoplay69)return false;hero.dataset.autoplay69='1';const show=()=>{index=(index+1)%images.length;const next=new Image();next.decoding='async';next.onload=()=>{hero.style.opacity='0';requestAnimationFrame(()=>{hero.src=next.src;hero.style.opacity='1'})};next.src=images[index]};setInterval(show,3200);return true};if(!start()){const observer=new MutationObserver(()=>{if(start())observer.disconnect()});observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(start,500)}})();
 </script>
+<style id="v70-banner-hooks-and-dividers">
+/* V7.0 — stronger breath-test hook, shared promo typography, clean ad dismissal. */
+.offerStack.adDismissed{display:none!important}
+.dolphinTourLabel{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-end!important;gap:4px!important;text-align:left!important;padding:18px 20px!important}
+.dolphinTourLabel strong{display:block;font:840 24px/.94 -apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,sans-serif;letter-spacing:-.05em;color:#fff}
+.dolphinTourLabel span{display:block;font:560 10px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,sans-serif;letter-spacing:-.01em;color:rgba(255,255,255,.78)}
+.breathQuestionCopy b{font-size:13px!important;line-height:1.12!important;letter-spacing:-.025em!important}
+@media(max-width:700px){.dolphinTourLabel strong{font-size:21px}.dolphinTourLabel{padding:16px 18px!important}}
+</style>
+<script id="v70-banner-behavior">
+(()=>{
+  const apply=()=>{
+    const breath=document.querySelector('#breathAdBubble .breathQuestionCopy');
+    if(breath){const kicker=breath.querySelector('.breathAdKicker'),title=breath.querySelector('b');if(kicker)kicker.textContent='ТЕСТ НА 1 МИНУТУ';if(title)title.textContent='Проверь себя: сколько секунд ты продержишься?'}
+    const dolphin=document.querySelector('#dolphinTourAd .dolphinTourLabel');
+    if(dolphin&&!dolphin.querySelector('strong'))dolphin.innerHTML='<strong>Риф Сатайя</strong><span>Попади на тур с дельфинами</span>';
+    const card=document.getElementById('videographerPoster'),stack=document.getElementById('mediaStack');
+    if(card&&stack&&!card.dataset.divider70){
+      card.dataset.divider70='1';
+      const sync=()=>stack.classList.toggle('adDismissed',getComputedStyle(card).display==='none');
+      new MutationObserver(sync).observe(card,{attributes:true,attributeFilter:['style']});sync();
+    }
+    return !!(breath&&dolphin&&card&&stack);
+  };
+  if(!apply()){const observer=new MutationObserver(()=>{if(apply())observer.disconnect()});observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(apply,500);setTimeout(apply,1400)}
+})();
+</script>
 </body></html>

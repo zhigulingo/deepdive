@@ -15,15 +15,19 @@ out = blend_path.parent / "underwater_dataset"
 images = out / "images"
 images.mkdir(parents=True, exist_ok=True)
 
-scene.render.engine = 'BLENDER_EEVEE'
+# Blender 4.2 renamed EEVEE to EEVEE Next; try the current id first and retain 4.0 compatibility.
+try:
+    scene.render.engine = 'BLENDER_EEVEE_NEXT'
+except TypeError:
+    scene.render.engine = 'BLENDER_EEVEE'
 scene.render.resolution_x, scene.render.resolution_y = WIDTH, HEIGHT
 scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = 'PNG'
 scene.render.image_settings.color_mode = 'RGB'
 scene.render.film_transparent = False
 scene.render.image_settings.color_depth = '8'
-scene.render.engine = 'BLENDER_EEVEE'
-scene.eevee.taa_render_samples = SAMPLES
+if hasattr(scene, 'eevee') and hasattr(scene.eevee, 'taa_render_samples'):
+    scene.eevee.taa_render_samples = SAMPLES
 
 cam = scene.camera
 cam.data.lens = 28

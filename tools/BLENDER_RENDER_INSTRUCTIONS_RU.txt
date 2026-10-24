@@ -1,0 +1,20 @@
+РЕНДЕР ДАТАСЕТА ДЛЯ GAUSSIAN SPLAT
+
+1. Установите Blender 4.0–4.5 с blender.org.
+2. Скопируйте underwater-canyon.blend и render_splat_dataset.py в одну папку.
+3. Откройте underwater-canyon.blend.
+4. Перейдите во вкладку Scripting.
+5. Нажмите Open и выберите render_splat_dataset.py.
+6. Нажмите Run Script (треугольник в редакторе кода).
+7. Не закрывайте Blender до сообщения DONE в консоли.
+
+Результат появится рядом с .blend в папке underwater_dataset:
+- images/ — 180 PNG-ракурсов;
+- transforms.json — точные параметры и положения камер;
+- README.txt — краткая сводка.
+
+На Windows консоль Blender можно открыть через Window > Toggle System Console.
+После завершения упакуйте всю папку underwater_dataset в ZIP и пришлите её.
+
+Если рендер идёт слишком долго, остановите его клавишей Esc, откройте скрипт и
+измените VIEWS = 180 на VIEWS = 100. Лучше оставить 180, если компьютер позволяет.

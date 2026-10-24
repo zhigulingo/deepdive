@@ -3499,4 +3499,42 @@ html,body{background:#050608!important;color:#f2f6fb!important}
   if(!apply()){const observer=new MutationObserver(()=>{if(apply())observer.disconnect()});observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(apply,500);setTimeout(apply,1400)}
 })();
 </script>
+<style id="v71-live-splat-demo">
+.splatDemoLauncher{border-color:rgba(101,231,255,.22)!important;background:linear-gradient(135deg,rgba(30,126,164,.14),rgba(94,74,180,.10))!important}
+.splatDemoLauncher .spotMenuV423Name:after{content:"LIVE";display:inline-flex;margin-left:8px;padding:3px 6px;border-radius:999px;background:#65e7ff;color:#04202b;font:850 6px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;vertical-align:2px}
+.splatDemoLauncher .spotMenuV423Metric strong{color:#8feeff!important}
+.splatDemoModal{position:absolute;z-index:300;inset:0;display:none;padding:12px;background:rgba(2,9,13,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.splatDemoModal.open{display:block}
+.splatDemoShell{position:relative;width:100%;height:100%;overflow:hidden;border:1px solid rgba(255,255,255,.14);border-radius:28px;background:#050b0e;box-shadow:0 30px 100px rgba(0,0,0,.58)}
+#splatDemoMount{position:absolute;inset:0}
+.splatDemoFrame{width:100%;height:100%;border:0;background:#050b0e}
+.splatDemoChrome{position:absolute;z-index:3;left:18px;top:18px;max-width:min(420px,calc(100% - 90px));padding:13px 15px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(4,16,21,.68);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);pointer-events:none}
+.splatDemoChrome small{display:block;margin-bottom:4px;color:#65e7ff;font:800 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em}.splatDemoChrome b{display:block;color:#f2faf8;font-size:15px;letter-spacing:-.025em}.splatDemoChrome span{display:block;margin-top:5px;color:rgba(224,239,235,.57);font-size:9px;line-height:1.4}
+.splatDemoClose{position:absolute;z-index:4;right:18px;top:18px;width:42px;height:42px;border:1px solid rgba(255,255,255,.14);border-radius:50%;background:rgba(4,16,21,.72);color:#fff;font-size:23px;line-height:1;cursor:pointer;backdrop-filter:blur(14px)}
+.splatDemoCredit{position:absolute;z-index:3;right:18px;bottom:16px;padding:7px 9px;border-radius:999px;background:rgba(4,16,21,.66);color:rgba(236,247,244,.62);font:650 7px/1 ui-monospace,SFMono-Regular,Menlo,monospace;text-decoration:none;backdrop-filter:blur(12px)}
+@media(max-width:980px){.splatDemoModal{position:fixed;padding:0}.splatDemoShell{border:0;border-radius:0}.splatDemoChrome{left:10px;top:10px}.splatDemoClose{right:10px;top:10px}.splatDemoCredit{right:10px;bottom:max(10px,env(safe-area-inset-bottom))}}
+</style>
+<div class="splatDemoModal" id="splatDemoModal" aria-hidden="true">
+  <section class="splatDemoShell" role="dialog" aria-modal="true" aria-label="Rock Splat technology demo">
+    <div class="splatDemoChrome"><small>SPOT 06 · REAL GAUSSIAN SPLAT</small><b>Rock Formation · Technology Demo</b><span>Готовая скальная сцена на движке SuperSplat. Вращай, приближай и оцени плавность на своём устройстве.</span></div>
+    <button class="splatDemoClose" type="button" aria-label="Закрыть demo">×</button>
+    <div id="splatDemoMount"></div>
+    <a class="splatDemoCredit" href="https://superspl.at/scene/aa0caa9c" target="_blank" rel="noopener">SOURCE · IU AVL / SUPERSPLAT ↗</a>
+  </section>
+</div>
+<script id="v71-live-splat-demo-script">
+(()=>{
+  const modal=document.getElementById('splatDemoModal'),mount=document.getElementById('splatDemoMount');
+  if(!modal||!mount)return;
+  const launcher=`<button class="spotMenuV423Item splatDemoLauncher" type="button" data-splat-demo="1"><span class="spotMenuV423Name">Rock Splat · Demo</span><span class="spotMenuV423Metric"><small>REAL SCAN</small><strong>10.3 MB</strong></span><span class="spotMenuV423Metric"><small>ENGINE</small><strong>SuperSplat</strong></span></button>`;
+  const inject=()=>{const menu=document.getElementById('spotMenuV423');if(menu&&!menu.querySelector('[data-splat-demo]'))menu.insertAdjacentHTML('beforeend',launcher)};
+  const open=()=>{if(!mount.firstElementChild){const frame=document.createElement('iframe');frame.className='splatDemoFrame';frame.title='SuperSplat rock formation viewer';frame.allow='fullscreen; xr-spatial-tracking';frame.loading='eager';frame.src='https://superspl.at/s?id=aa0caa9c';mount.appendChild(frame)}modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';modal.querySelector('.splatDemoClose').focus()};
+  const close=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow=''};
+  document.addEventListener('click',e=>{if(e.target.closest('[data-splat-demo]')){e.preventDefault();e.stopPropagation();open()}},true);
+  modal.querySelector('.splatDemoClose').addEventListener('click',close);
+  modal.addEventListener('pointerdown',e=>{if(e.target===modal)close()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))close()});
+  inject();const menu=document.getElementById('spotMenuV423');if(menu)new MutationObserver(inject).observe(menu,{childList:true});setTimeout(inject,250);
+})();
+</script>
 </body></html>

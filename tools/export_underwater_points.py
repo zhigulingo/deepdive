@@ -9,7 +9,7 @@ from mathutils import Vector
 POINTS = 240_000
 SEED = 7319
 OUT = Path(bpy.path.abspath("//underwater-canyon.points"))
-EXCLUDE = {"Camera", "Water Volume"}
+EXCLUDE = {"camera", "water volume"}
 
 
 def material_color(obj, polygon):
@@ -33,7 +33,7 @@ triangles = []
 total_area = 0.0
 
 for source in bpy.context.scene.objects:
-    if source.type != "MESH" or source.name in EXCLUDE or source.hide_render:
+    if source.type != "MESH" or source.name.lower() in EXCLUDE or source.hide_render:
         continue
     obj = source.evaluated_get(depsgraph)
     mesh = obj.to_mesh()

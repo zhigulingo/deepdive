@@ -18,6 +18,4 @@ function openWorkout(w) {
 document.querySelector('.dialog-close').onclick = () => dialog.close();
 dialog.onclick = e => { if (e.target === dialog) dialog.close(); };
 document.querySelectorAll('.filter').forEach(button => button.onclick = () => { document.querySelector('.filter.active').classList.remove('active'); button.classList.add('active'); render(button.dataset.filter); });
-document.querySelector('#logout').onclick = () => { sessionStorage.removeItem('form_demo'); location.href='./'; };
 workouts = window.WORKOUTS || []; render();
-
